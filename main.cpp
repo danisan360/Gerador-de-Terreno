@@ -2,24 +2,13 @@
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 
+#include "shader_s.h"
+
 #include <iostream>
+#include <cmath>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
-
-const char *vertexShaderSource = "#version 330 core\n"
-	"layout (location = 0) in vec3 aPos;\n"
-	"void main()\n"
-	"{\n"
-	"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-	"}\0";
-
-const char *fragmentShaderSource = "#version 330 core\n"
-	"out vec4 FragColor;\n"
-	"void main()\n"
-	"{\n"
-	"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-	"}\n\0";
 
 int main(){
 	glfwInit(); //Inicializa o GLFW
@@ -48,64 +37,15 @@ int main(){
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	//Build e compila os programas shaders
-	//------------------------------------
-	//Vertex shader
-	unsigned int vertexShader;
-	//Criando um shader do typo GL_VERTEX_SHADER
-	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	//Argumentos.Objeto shader a ser compilado.Quantas strings estamos passando.O codigo fonte
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader); //Compila :P
-	//Checa erros de compilação
-	int success; //indica sucesso
-	char infoLog[512]; //Guarda mensagens de erro(se houverem).
-	//Função checa se a compilação foi bem sucedida
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	//se a compilação n for bem sucedida
-	if(!success){
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-	//------------------------------------
-	//Fragment shader(calcula o output da cor de nossos pixels)
-	unsigned int fragmentShader;
-	//Criando um shader do typo GL_FRAGMENT_SHADER
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	//Argumentos.Objeto shader a ser compilado.Quantas strings estamos passando.O codigo fonte
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);// Compila :P
-	//Checa erros de compilação
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	//Se a compilação n for bem sucedida
-	if(!success){
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-	//------------------------------------
-	//Linkando os shaders
-	unsigned int shaderProgram;
-	//Cria um programa e retorna o ID de referencia do objeto criado
-	shaderProgram = glCreateProgram();
-	//Agr iremos anexar os shaders compilados ao objeto programa e linkalos
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-	//Checa por erros na linkagem
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if(!success){
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;	
-	}
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	Shader shaderProgram("3.3.shader.vs", "3.3.shader.fs");
 
 	//Vertices de um triangulo
 	float vertices[] = {
-		0.5f,  0.5f,  0.0f,
-		0.5f, -0.5f,  0.0f,
-	   -0.5f, -0.5f,  0.0f,
-	   -0.5f,  0.5f,  0.0f
+		//posições        //cores
+		0.5f,  0.5f,  0.0f,  1.0f, 0.0f, 0.0f,
+		0.5f, -0.5f,  0.0f,  0.0f, 1.0f, 0.0f,
+	   -0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 1.0f,
+	   -0.5f,  0.5f,  0.0f,  1.0f, 1.0f, 1.0f
 	};
 
 	unsigned int indices[] = {
@@ -136,9 +76,13 @@ int main(){
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	//atributo de posição
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	
+	//atributo de cor
+	glVertexAttribPointer(1, 3,GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
@@ -159,7 +103,11 @@ int main(){
 		glClear(GL_COLOR_BUFFER_BIT); //State-using
 
 		//Desenha o triangulo
-		glUseProgram(shaderProgram);
+
+		//ativa o shader
+		shaderProgram.use();
+		
+		//renderiza o triangulo
 		glBindVertexArray(VAO);
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
