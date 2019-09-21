@@ -30,10 +30,6 @@ int main(){
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	#ifdef __APPLE__
-    	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
-	#endif
-
 	//Criar a janela
 	//Argumentos: width(Largura), height(altura), Nome da janela.Retorna um objeto GLFWwindow
 	GLFWwindow* window = glfwCreateWindow(800, 600, "Daniel", NULL, NULL);
@@ -44,7 +40,7 @@ int main(){
 	}
 	//Fazemos o GLFW tornar o "context" da nossa janela o "context" principal da nossa thread atual
 	glfwMakeContextCurrent(window);
-	//Queremos chamar essa função sempre a mudarem o tamanho da janela
+	//Queremos chamar essa função sempre q mudarem o tamanho da janela
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	//Existem diversos tipos de callbacks functions
 
@@ -106,17 +102,27 @@ int main(){
 
 	//Vertices de um triangulo
 	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		 0.0f,  0.5f, 0.0f
+		0.5f,  0.5f,  0.0f,
+		0.5f, -0.5f,  0.0f,
+	   -0.5f, -0.5f,  0.0f,
+	   -0.5f,  0.5f,  0.0f
 	};
 
-	unsigned int VBO, VAO;//Vertex buffer objects can store a large number of vertices in the gpu
+	unsigned int indices[] = {
+		0, 1, 2,
+		0, 2, 3
+	};
+
+	unsigned int VBO, VAO, EBO;//Vertex buffer objects can store a large number of vertices in the gpu
 	//A vantagem disso é que podemos enviar grandes quantidades de dados de uma só vez para a placa gráfica
 	//sem precisar enviar um vértice por vez
 	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO); //Gera objetos buffer
-	glBindVertexArray(VAO);
+	glGenBuffers(1, &VBO); //Gera objetos buffer]
+	glGenBuffers(1, &EBO);
+
+	glBindVertexArray(VAO);// bind vertex array object
+
+	//Copia nosso array de vertices em um buffer para o opengl usar
 	glBindBuffer(GL_ARRAY_BUFFER, VBO); //Junta o buffer recem criado com GL_ARRAY_BUFFER
 	//Copia os vertices definidos na memoria do buffer
 	//Argumentos:O tipo de buffer que queremos copiar data para.Tamanho do data em bytes que queremos enviar
@@ -127,10 +133,17 @@ int main(){
     //GL_STREAM_DRAW: the data will change every time it is drawn.
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);//Wireframe 
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	//Render loop.Criamos um loop que continua rodando até que o GLFW pare
 	//glfwWindowShouldClose checa no inicio de cada iteração se o GLFW foi mandado parar
@@ -148,7 +161,8 @@ int main(){
 		//Desenha o triangulo
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		//Checa se qualquer evento é ativado(keyboard input etc), atualiza o estado da ja
 		//nela e chama as funções correspondentes(que podemos setar por metodos callback)
@@ -159,6 +173,7 @@ int main(){
 
 	glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 	//Depois de sair do loop deletamos todos os recursos alocados pelo GLFW.
 	glfwTerminate();
 	return 0;
