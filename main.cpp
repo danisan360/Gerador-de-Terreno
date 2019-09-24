@@ -4,23 +4,26 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "glm-master/glm/glm.hpp"
+#include "glm-master/glm/gtc/matrix_transform.hpp"
+#include "glm-master/glm/gtc/type_ptr.hpp"
+
 #include "shader_s.h"
 
 #include <iostream>
 #include <cmath>
+#include <vector>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
-template <typename T, typename I, typename O>
-float MapInRange(T x, I in_min, I in_max, O out_min, O out_max)
-{
+float MapInRange(float x, float in_min, float in_max, float out_min, float out_max){
     if(x < in_min) x = in_min;
     if(x > in_max) x = in_max;
     return (float)((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
 }
 
-float mixValue = 0.2f;
+float timeRot = 5.0f;
 
 int main(){
     glfwInit(); //Inicializa o GLFW
@@ -52,36 +55,100 @@ int main(){
     Shader shaderProgram("3.3.shader.vs", "3.3.shader.fs");
 
     //Vertices de um triangulo
-    float vertices[] = {
-        //posições        //cores            //Cordenadas de textura
-        0.0f ,  0.0f,  1.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1), MapInRange(1.0, 0.0, 1.0, 0, 1),
-        0.25f,  0.0f,  1.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1), MapInRange(1.0, 0.0, 1.0, 0, 1),
-        0.5f ,  0.0f,  1.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1), MapInRange(1.0, 0.0, 1.0, 0, 1),
-        0.75f,  0.0f,  1.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1), MapInRange(1.0, 0.0, 1.0, 0, 1),
-        1.0f ,  0.0f,  1.0f,    1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1), MapInRange(1.0, 0.0, 1.0, 0, 1),
-        0.0f ,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1), MapInRange(0.75, 0.0, 1.0, 0, 1),
-        0.25f,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1), MapInRange(0.75, 0.0, 1.0, 0, 1),
-        0.5f ,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1), MapInRange(0.75, 0.0, 1.0, 0, 1),
-        0.75f,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1), MapInRange(0.75, 0.0, 1.0, 0, 1),
-        1.0f ,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1), MapInRange(0.75, 0.0, 1.0, 0, 1),
-        0.0f ,  0.0f,  0.5f,    1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1), MapInRange(0.5, 0.0, 1.0, 0, 1),
-        0.25f,  0.0f,  0.5f,    1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1), MapInRange(0.5, 0.0, 1.0, 0, 1),
-        0.5f ,  0.0f,  0.5f,    1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1), MapInRange(0.5, 0.0, 1.0, 0, 1),
-        0.75f,  0.0f,  0.5f,    1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1), MapInRange(0.5, 0.0, 1.0, 0, 1),
-        1.0f ,  0.0f,  0.5f,    1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1), MapInRange(0.5, 0.0, 1.0, 0, 1),
-        0.0f ,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1), MapInRange(0.25f, 0.0, 1.0, 0, 1),
-        0.25f,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1), MapInRange(0.25f, 0.0, 1.0, 0, 1),
-        0.5f ,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1), MapInRange(0.25f, 0.0, 1.0, 0, 1),
-        0.75f,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1), MapInRange(0.25f, 0.0, 1.0, 0, 1),
-        1.0f ,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1), MapInRange(0.25f, 0.0, 1.0, 0, 1),
-        0.0f ,  0.0f,  0.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1), MapInRange(0.0, 0.0, 1.0, 0, 1),
-        0.25f,  0.0f,  0.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1), MapInRange(0.0, 0.0, 1.0, 0, 1),
-        0.5f ,  0.0f,  0.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1), MapInRange(0.0, 0.0, 1.0, 0, 1),
-        0.75f,  0.0f,  0.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1), MapInRange(0.0, 0.0, 1.0, 0, 1),
-        1.0f ,  0.0f,  0.0f,    1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1), MapInRange(0.0, 0.0, 1.0, 0, 1),  
-    };
+    std::vector<float> vertices1;
+    std::vector<int> indices1;
+    int numVert = 20;
+    float curZ = -1.0f;
+    int count = 0;
+    for (float i = 0; i < numVert; i+=1){
+        float curX = -1.0f;
+        for (float  j = 0; j < numVert ; j+=1){
+            std::cout<< count<< "\n";
+            count++;
+           // std::cout << "curX: "<<curX<<" curZ: "<<curZ<<std::endl;
+            vertices1.push_back(curX);
+            vertices1.push_back(0.0f);
+            vertices1.push_back(curZ);
+            vertices1.push_back(MapInRange(curX, -1.0f, 1.0f, 0, 1));
+            vertices1.push_back(MapInRange(curZ, -1.0f, 1.0f, 0, 1));
+            
+            curX += (float)2/numVert;
+            if(curX == -0.999999f) curX = -0.1f;
+            //std::cout<< "curX agr é: "<<curX<<"\n";
+        }
+        curZ += (float)2/numVert;;
 
-    unsigned int indices[] = {
+    }
+    for(int i=0;i<(numVert)*numVert;i++){
+        indices1.push_back(i);
+        indices1.push_back(i+1);
+        indices1.push_back(i+numVert);
+        indices1.push_back(i+1);
+        indices1.push_back(i+1+numVert);
+        indices1.push_back(i+numVert);
+    }
+    /*for(int i=0;i<vertices1.size();i++){
+        std::cout <<vertices1[i]<<" ";
+        i++;
+        std::cout <<vertices1[i]<<" ";
+        i++;
+        std::cout <<vertices1[i]<<" ";
+        i++;
+        std::cout <<vertices1[i]<<" ";
+        i++;
+        std::cout <<vertices1[i]<<std::endl;
+    }*/
+    //std::cout<<"a conta: "<<-0.2f + 0.1f<<"\n";
+    float vertices[vertices1.size() ];
+    unsigned int indices[indices1.size() ];
+    for(int i=0;i<vertices1.size();i++){
+        vertices[i] = vertices1[i];
+        //std::cout << vertices[i]<<std::endl;
+    }
+    /*for(int i=0;i<vertices1.size();i++){
+        std::cout << vertices[i]<<" ";
+        i++;
+        std::cout << vertices[i]<<" ";
+        i++;
+        std::cout << vertices[i]<<" ";
+        i++;
+        std::cout << vertices[i]<<" ";
+        i++;
+        std::cout << vertices[i]<<std::endl;
+    }*/
+    for(int i = 0;i<indices1.size();i++){
+        indices[i] = indices1[i];
+    }
+    /*float vertices[] = {
+        //posições        //cores            //Cordenadas de textura
+        0.0f ,  0.0f,  1.0f ,   1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1) ,  MapInRange(1.0, 0.0, 1.0, 0, 1),
+        0.25f,  0.0f,  1.0f ,   1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1),  MapInRange(1.0, 0.0, 1.0, 0, 1),
+        0.5f ,  0.0f,  1.0f ,   1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1) ,  MapInRange(1.0, 0.0, 1.0, 0, 1),
+        0.75f,  0.0f,  1.0f ,   1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1),  MapInRange(1.0, 0.0, 1.0, 0, 1),
+        1.0f ,  0.0f,  1.0f ,   1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1) ,  MapInRange(1.0, 0.0, 1.0, 0, 1),
+        0.0f ,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1) ,  MapInRange(0.75, 0.0, 1.0, 0, 1),
+        0.25f,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1),  MapInRange(0.75, 0.0, 1.0, 0, 1),
+        0.5f ,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1) ,  MapInRange(0.75, 0.0, 1.0, 0, 1),
+        0.75f,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1),  MapInRange(0.75, 0.0, 1.0, 0, 1),
+        1.0f ,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1) ,  MapInRange(0.75, 0.0, 1.0, 0, 1),
+        0.0f ,  0.0f,  0.5f ,   1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1) ,  MapInRange(0.5, 0.0, 1.0, 0, 1),
+        0.25f,  0.0f,  0.5f ,   1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1),  MapInRange(0.5, 0.0, 1.0, 0, 1),
+        0.5f ,  0.0f,  0.5f ,   1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1) ,  MapInRange(0.5, 0.0, 1.0, 0, 1),
+        0.75f,  0.0f,  0.5f ,   1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1),  MapInRange(0.5, 0.0, 1.0, 0, 1),
+        1.0f ,  0.0f,  0.5f ,   1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1) ,  MapInRange(0.5, 0.0, 1.0, 0, 1),
+        0.0f ,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1) ,  MapInRange(0.25f, 0.0, 1.0, 0, 1),
+        0.25f,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1),  MapInRange(0.25f, 0.0, 1.0, 0, 1),
+        0.5f ,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1) ,  MapInRange(0.25f, 0.0, 1.0, 0, 1),
+        0.75f,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1),  MapInRange(0.25f, 0.0, 1.0, 0, 1),
+        1.0f ,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1) ,  MapInRange(0.25f, 0.0, 1.0, 0, 1),
+        0.0f ,  0.0f,  0.0f ,   1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1) ,  MapInRange(0.0, 0.0, 1.0, 0, 1),
+        0.25f,  0.0f,  0.0f ,   1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1),  MapInRange(0.0, 0.0, 1.0, 0, 1),
+        0.5f ,  0.0f,  0.0f ,   1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1) ,  MapInRange(0.0, 0.0, 1.0, 0, 1),
+        0.75f,  0.0f,  0.0f ,   1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1),  MapInRange(0.0, 0.0, 1.0, 0, 1),
+        1.0f ,  0.0f,  0.0f ,   1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1) ,  MapInRange(0.0, 0.0, 1.0, 0, 1),  
+    };*/
+
+    /*unsigned int indices[] = {
         0 , 5 , 6,
         0 , 6 , 1,
         1 , 6 , 7,
@@ -116,7 +183,7 @@ int main(){
         18, 24, 19 
 
 
-    };
+    };*/
 
     unsigned int VBO, VAO, EBO;//Vertex buffer objects can store a large number of vertices in the gpu
     //A vantagem disso é que podemos enviar grandes quantidades de dados de uma só vez para a placa gráfica
@@ -142,13 +209,13 @@ int main(){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     //atributo de posição
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     //atributo de cor
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    //glEnableVertexAttribArray(1);
     //atibuto das cordenadas de textura
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
     //Carrega e cria uma textura
@@ -204,14 +271,24 @@ int main(){
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
 
-        shaderProgram.setFloat("mixValue", mixValue);
+        glm::ortho(-200.0f, 800.0f, 600.0f, 600.0f, 0.1f, 100.0f);
+
+        //cria as transformações
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, glm::vec3(0.0f, 0.0f, 0.2f));
+        float save = (float)glfwGetTime();
+        save = save/timeRot;
+        transform = glm::rotate(transform, save, glm::vec3(-1.0f, 0.0f, 0.0f));
 
         //ativa o shader
         shaderProgram.use();
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
         //renderiza o triangulo
         glBindVertexArray(VAO);
         //glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDrawElements(GL_TRIANGLES, 32*3, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 4000, GL_UNSIGNED_INT, 0);
 
         //Checa se qualquer evento é ativado(keyboard input etc), atualiza o estado da ja
         //nela e chama as funções correspondentes(que podemos setar por metodos callback)
@@ -248,14 +325,11 @@ void processInput(GLFWwindow* window){
         glfwSetWindowShouldClose(window, true);
     }
     if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-        mixValue += 0.01f;
-        if(mixValue >= 1.0f)
-            mixValue = 1.0f;
+        timeRot += 0.1f;
+        //std::cout << timeRot << std::endl;
     }
     if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-        mixValue -= 0.01f;
-        if(mixValue <= 0.0f){
-            mixValue = 0.0f;
-        }
+        timeRot -= 0.1f;
+        //std::cout << timeRot << std::endl;
     }
 }
