@@ -12,6 +12,14 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
+template <typename T, typename I, typename O>
+float MapInRange(T x, I in_min, I in_max, O out_min, O out_max)
+{
+    if(x < in_min) x = in_min;
+    if(x > in_max) x = in_max;
+    return (float)((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
+}
+
 float mixValue = 0.2f;
 
 int main(){
@@ -46,15 +54,68 @@ int main(){
     //Vertices de um triangulo
     float vertices[] = {
         //posições        //cores            //Cordenadas de textura
-        0.5f,  0.5f,  0.0f,  1.0f, 0.0f, 0.0f,   2.0f, 2.0f,
-        0.5f, -0.5f,  0.0f,  0.0f, 1.0f, 0.0f,   2.0f, 0.0f,
-       -0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-       -0.5f,  0.5f,  0.0f,  1.0f, 1.0f, 1.0f,   0.0f, 2.0f   
+        0.0f ,  0.0f,  1.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1), MapInRange(1.0, 0.0, 1.0, 0, 1),
+        0.25f,  0.0f,  1.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1), MapInRange(1.0, 0.0, 1.0, 0, 1),
+        0.5f ,  0.0f,  1.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1), MapInRange(1.0, 0.0, 1.0, 0, 1),
+        0.75f,  0.0f,  1.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1), MapInRange(1.0, 0.0, 1.0, 0, 1),
+        1.0f ,  0.0f,  1.0f,    1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1), MapInRange(1.0, 0.0, 1.0, 0, 1),
+        0.0f ,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1), MapInRange(0.75, 0.0, 1.0, 0, 1),
+        0.25f,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1), MapInRange(0.75, 0.0, 1.0, 0, 1),
+        0.5f ,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1), MapInRange(0.75, 0.0, 1.0, 0, 1),
+        0.75f,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1), MapInRange(0.75, 0.0, 1.0, 0, 1),
+        1.0f ,  0.0f,  0.75f,   1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1), MapInRange(0.75, 0.0, 1.0, 0, 1),
+        0.0f ,  0.0f,  0.5f,    1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1), MapInRange(0.5, 0.0, 1.0, 0, 1),
+        0.25f,  0.0f,  0.5f,    1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1), MapInRange(0.5, 0.0, 1.0, 0, 1),
+        0.5f ,  0.0f,  0.5f,    1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1), MapInRange(0.5, 0.0, 1.0, 0, 1),
+        0.75f,  0.0f,  0.5f,    1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1), MapInRange(0.5, 0.0, 1.0, 0, 1),
+        1.0f ,  0.0f,  0.5f,    1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1), MapInRange(0.5, 0.0, 1.0, 0, 1),
+        0.0f ,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1), MapInRange(0.25f, 0.0, 1.0, 0, 1),
+        0.25f,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1), MapInRange(0.25f, 0.0, 1.0, 0, 1),
+        0.5f ,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1), MapInRange(0.25f, 0.0, 1.0, 0, 1),
+        0.75f,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1), MapInRange(0.25f, 0.0, 1.0, 0, 1),
+        1.0f ,  0.0f,  0.25f,   1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1), MapInRange(0.25f, 0.0, 1.0, 0, 1),
+        0.0f ,  0.0f,  0.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.0, 0.0, 1.0, 0, 1), MapInRange(0.0, 0.0, 1.0, 0, 1),
+        0.25f,  0.0f,  0.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.25, 0.0, 1.0, 0, 1), MapInRange(0.0, 0.0, 1.0, 0, 1),
+        0.5f ,  0.0f,  0.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.5, 0.0, 1.0, 0, 1), MapInRange(0.0, 0.0, 1.0, 0, 1),
+        0.75f,  0.0f,  0.0f,    1.0f, 1.0f, 1.0f,  MapInRange(0.75, 0.0, 1.0, 0, 1), MapInRange(0.0, 0.0, 1.0, 0, 1),
+        1.0f ,  0.0f,  0.0f,    1.0f, 1.0f, 1.0f,  MapInRange(1.0, 0.0, 1.0, 0, 1), MapInRange(0.0, 0.0, 1.0, 0, 1),  
     };
 
     unsigned int indices[] = {
-        0, 1, 2,
-        0, 2, 3
+        0 , 5 , 6,
+        0 , 6 , 1,
+        1 , 6 , 7,
+        1 , 7 , 2,
+        2 , 7 , 8,
+        2 , 8 , 3,
+        3 , 8 , 9,
+        3 , 9 , 4,
+        5 , 10, 11,
+        5 , 11, 6,
+        6 , 11, 12,
+        6 , 12, 7,
+        7 , 12, 13,
+        7 , 13, 8,
+        8 , 13, 14,
+        8 , 14, 9,
+        10, 15, 16,
+        10, 16, 11,
+        11, 16, 17,
+        11, 17, 12,
+        12, 17, 18,
+        12, 18, 13,
+        13, 18, 19,
+        13, 19, 14,
+        15, 20, 21,
+        15, 21, 16,
+        16, 21, 22,
+        16, 22, 17,
+        17, 22, 23,
+        17, 23, 18,
+        18, 23, 24,
+        18, 24, 19 
+
+
     };
 
     unsigned int VBO, VAO, EBO;//Vertex buffer objects can store a large number of vertices in the gpu
@@ -104,7 +165,7 @@ int main(){
     //Carrega a imagem
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load("tassio.jpeg", &width, &height, &nrChannels, 0);    
+    unsigned char *data = stbi_load("mapadealtura.jpeg", &width, &height, &nrChannels, 0);    
     if(data){
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -116,25 +177,6 @@ int main(){
 
     //Carrega e cria uma textura2
     //--------------------------
-    unsigned int texture2;
-    glGenTextures(1, &texture2);
-    glBindTexture(GL_TEXTURE_2D, texture2);//
-    //seta os parametos de wrapping
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//seta o repeat
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    //seta os parametros de filtragem
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //Carrega a imagem
-    data = stbi_load("bolo.png", &width, &height, &nrChannels, 0); 
-    if(data){
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else{
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
 
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
     //glBindVertexArray(0);
@@ -143,8 +185,7 @@ int main(){
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     shaderProgram.use();
-    glUniform1i(glGetUniformLocation(shaderProgram.ID, "texture"), 0);
-    shaderProgram.setInt("texture2", 1);
+    
 
     //Render loop.Criamos um loop que continua rodando até que o GLFW pare
     //glfwWindowShouldClose checa no inicio de cada iteração se o GLFW foi mandado parar
@@ -162,8 +203,6 @@ int main(){
         //bind na textura
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
 
         shaderProgram.setFloat("mixValue", mixValue);
 
@@ -172,7 +211,7 @@ int main(){
         //renderiza o triangulo
         glBindVertexArray(VAO);
         //glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 32*3, GL_UNSIGNED_INT, 0);
 
         //Checa se qualquer evento é ativado(keyboard input etc), atualiza o estado da ja
         //nela e chama as funções correspondentes(que podemos setar por metodos callback)
