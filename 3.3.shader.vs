@@ -7,10 +7,13 @@ out vec2 TexCoord;
 out vec3 ourColor;
 
 uniform sampler2D texture1;
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
 
 void main(){
 	//gl_Position = vec4(aPos.x, aPos.z, 1.0, 1.0);
-	gl_Position = vec4(aPos.x, (texture(texture1,aTexCoord).r *1.25) , aPos.z, 1.0);
+	gl_Position = projection * view * model * vec4(aPos.x, (texture(texture1,aTexCoord).r *2.25) , aPos.z, 1.0);
 	TexCoord = vec2(aTexCoord.x, aTexCoord.y);
 	ourColor = aColor;
 }
