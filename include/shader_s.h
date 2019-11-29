@@ -2,7 +2,7 @@
 #define SHADER_H
 
 #include <GL/glew.h>
-#include "glm-master/glm/glm.hpp"
+#include "../glm-master/glm/glm.hpp"
 
 #include <string>
 #include <fstream>

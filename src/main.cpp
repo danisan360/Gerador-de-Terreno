@@ -2,14 +2,14 @@
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "../include/stb_image.h"
 
-#include "glm-master/glm/glm.hpp"
-#include "glm-master/glm/gtc/matrix_transform.hpp"
-#include "glm-master/glm/gtc/type_ptr.hpp"
+#include "../glm-master/glm/glm.hpp"
+#include "../glm-master/glm/gtc/matrix_transform.hpp"
+#include "../glm-master/glm/gtc/type_ptr.hpp"
 
-#include "shader_s.h"
-#include "camera.h"
+#include "../include/shader_s.h"
+#include "../include/camera.h"
 
 #include <iostream>
 #include <cmath>
@@ -45,7 +45,7 @@ int main(){
 
     //Criar a janela
     //Argumentos: width(Largura), height(altura), Nome da janela.Retorna um objeto GLFWwindow
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Daniel", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Terreno", NULL, NULL);
     if(window == NULL){
         std::cout << "Falhou em criar a Janela GLFW" << std::endl;
         glfwTerminate();
@@ -83,7 +83,7 @@ int main(){
     //Carrega a imagem
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load("height_map/mapa_de_altura_1.jpeg", &width, &height, &nrChannels, 0);    
+    unsigned char *data = stbi_load("../height_map/mapa_de_altura_1.jpeg", &width, &height, &nrChannels, 0);    
     if(data){
         //DEGUGAR
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -163,7 +163,7 @@ int main(){
     //Carrega a imagem
     //int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
-    data = stbi_load("textures/mapa_de_altura_1_textura(4097).png", &width, &height, &nrChannels, 0);
+    data = stbi_load("../textures/mapa_de_altura_1_textura(4097).png", &width, &height, &nrChannels, 0);
     if(data){
         //DEGUGAR
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
