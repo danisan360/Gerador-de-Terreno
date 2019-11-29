@@ -67,7 +67,7 @@ int main(){
 
     glEnable(GL_DEPTH_TEST); //z buffer
 
-    Shader shaderProgram("shader.vs", "shader.fs");
+    Shader shaderProgram("src/shader.vs", "src/shader.fs");
 
     //Carrega e cria uma textura
     //--------------------------
@@ -83,7 +83,7 @@ int main(){
     //Carrega a imagem
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load("../height_map/mapa_de_altura_1.jpeg", &width, &height, &nrChannels, 0);    
+    unsigned char *data = stbi_load("height_map/mapa_de_altura_1.jpeg", &width, &height, &nrChannels, 0);    
     if(data){
         //DEGUGAR
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -163,7 +163,7 @@ int main(){
     //Carrega a imagem
     //int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
-    data = stbi_load("../textures/mapa_de_altura_1_textura(4097).png", &width, &height, &nrChannels, 0);
+    data = stbi_load("textures/mapa_de_altura_1_textura.png", &width, &height, &nrChannels, 0);
     if(data){
         //DEGUGAR
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
